@@ -44,7 +44,7 @@ Agent（Codex），然后去倒杯咖啡：
    Tunnel、端口这些词，不要向我解释；出了问题先自己修。
 ```
 
-**更新**：仅在被要求时按 [maintenance](skill/references/maintenance.md) 更新；先保存旧 source 与安装回复点，再运行完整目录 helper。`c2c update-check` 只查询版本，不安装或更新 skill，不授权覆写自订内容。
+**更新**：仅在被要求时按 [maintenance](skill/references/maintenance.md) 更新；先保存旧 source 与安装回复点，再运行完整目录 helper。`c2c update-check` 查询版本并可写入本机诊断快取，不安装或更新 skill，不授权覆写自订内容。
 
 ## 安装 → 配置 → 使用（手动版）
 

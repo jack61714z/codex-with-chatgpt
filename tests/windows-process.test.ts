@@ -1,6 +1,4 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import path from "node:path";
-import fs from "node:fs";
 import { makeTmpDir, cleanup, makeGitRepo, write } from "./helpers.js";
 
 const spawnSyncCalls: { file: string; args: any[]; options: any }[] = [];
@@ -22,6 +20,7 @@ vi.mock("node:child_process", async (importOriginal) => {
 });
 
 // Import modules under test after mock is established
+import { runUpdateGit } from "../src/update/check.js";
 import { runGit } from "../src/workspace/git.js";
 import { findRipgrep, resetRipgrepCache, searchWorkspace } from "../src/workspace/search.js";
 import { Workspace } from "../src/workspace/manager.js";
@@ -96,11 +95,15 @@ describe("Windows background subprocess windowsHide: true (RED verification)", (
     expect(provisionCall?.options).toHaveProperty("windowsHide", true);
   });
 
-  it("6. src/cli/index.ts update-check runGit passes windowsHide: true", () => {
-    const cliSource = fs.readFileSync(path.resolve("src/cli/index.ts"), "utf8");
-    // Verify runGit under update-check in cli/index.ts includes windowsHide: true
-    const updateCheckSection = cliSource.slice(cliSource.indexOf("// ---------------------------------------------------------------- update-check"));
-    const runGitSnippet = updateCheckSection.slice(0, updateCheckSection.indexOf("program"));
-    expect(runGitSnippet).toContain("windowsHide: true");
+  it("6. update-check Git runner hides the window and forbids lazy fetch", () => {
+    makeGitRepo(tmpDir);
+    spawnSyncCalls.length = 0;
+    expect(runUpdateGit(tmpDir, ["rev-parse", "HEAD"]).ok).toBe(true);
+    expect(spawnSyncCalls).toHaveLength(1);
+    const call = spawnSyncCalls[0];
+    expect(call.file).toBe("git");
+    expect(call.args).toEqual(["--no-lazy-fetch", "rev-parse", "HEAD"]);
+    expect(call.options.windowsHide).toBe(true);
+    expect(call.options.env.GIT_NO_LAZY_FETCH).toBe("1");
   });
 });

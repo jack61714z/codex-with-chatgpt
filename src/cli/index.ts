@@ -59,6 +59,7 @@ import {
 import { appendExecutionRecord } from "../execution/records.js";
 import { saveExecutionOutput } from "../execution/output.js";
 import { importMediaAsset } from "../media/import.js";
+import { classifyUpdate, cachedUpdate, type UpdateRelation, runUpdateGit, fingerprintOrigin } from "../update/check.js";
 
 const program = new Command();
 
@@ -834,16 +835,7 @@ acceptUnusedWorkspaceOption(
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 
-function runGit(args: string[]): { ok: boolean; stdout: string } {
-  const result = spawnSync("git", args, {
-    cwd: repoRoot,
-    encoding: "utf8",
-    timeout: 8000,
-    env: { ...process.env, GIT_TERMINAL_PROMPT: "0" },
-    windowsHide: true,
-  });
-  return { ok: result.status === 0, stdout: (result.stdout ?? "").trim() };
-}
+const runGit = (args: string[]) => runUpdateGit(repoRoot, args);
 
 acceptUnusedWorkspaceOption(
   program
@@ -855,9 +847,9 @@ acceptUnusedWorkspaceOption(
   .action((opts: { force: boolean; json: boolean }) => {
     const file = path.join(getStateDir(), "update-check.json");
     const today = new Date().toLocaleDateString("en-CA"); // YYYY-MM-DD in local tz
-    let last: { date?: string; updateAvailable?: boolean } = {};
+    let last: unknown = null;
     try {
-      last = JSON.parse(fs.readFileSync(file, "utf8")) as typeof last;
+      last = JSON.parse(fs.readFileSync(file, "utf8"));
     } catch {
       /* first run */
     }
@@ -867,6 +859,7 @@ acceptUnusedWorkspaceOption(
       updateAvailable: boolean;
       localCommit?: string;
       remoteCommit?: string;
+      relation?: UpdateRelation;
       note?: string;
     }): void => {
       if (opts.json) say(JSON.stringify({ ok: true, version: VERSION, ...data }));
@@ -874,24 +867,41 @@ acceptUnusedWorkspaceOption(
       else say(data.note ?? "已是最新版本。");
     };
 
-    if (!opts.force && last.date === today) {
-      emit({ checked: false, updateAvailable: last.updateAvailable ?? false, note: "今天已检查过更新。" });
+    const local = runGit(["rev-parse", "HEAD"]);
+    const origin = runGit(["remote", "get-url", "origin"]);
+    const originFingerprint = origin.ok ? fingerprintOrigin(origin.stdout) : null;
+    const cached = local.ok && !opts.force ? cachedUpdate(last, today, repoRoot, local.stdout, originFingerprint) : null;
+    if (cached) {
+      emit({ checked: false, updateAvailable: cached.updateAvailable, relation: cached.relation,
+        localCommit: cached.localCommit, remoteCommit: cached.remoteCommit, note: "今天已检查过更新。" });
       return;
     }
-
-    const local = runGit(["rev-parse", "HEAD"]);
-    const remote = runGit(["ls-remote", "origin", "HEAD"]);
+    // A fresh attempt must not leave an older positive result reusable after an unknown outcome.
+    fs.rmSync(file, { force: true });
+    const remote = local.ok && originFingerprint ? runGit(["ls-remote", "origin", "HEAD"]) : { ok: false, stdout: "" };
     if (!local.ok || !remote.ok || !remote.stdout) {
       // Offline or not a git checkout: skip quietly and retry tomorrow-ish (do not
       // record the date so a transient failure does not suppress the daily check).
-      emit({ checked: false, updateAvailable: false, note: "无法检查更新（离线或非 git 安装），已跳过。" });
+      emit({ checked: false, updateAvailable: false, relation: "unknown", note: "无法检查更新（origin 不可用、离线或 Git 不支持 --no-lazy-fetch），已跳过。" });
       return;
     }
     const remoteCommit = remote.stdout.split(/\s/)[0];
-    const updateAvailable = remoteCommit !== local.stdout;
-    fs.mkdirSync(getStateDir(), { recursive: true });
-    fs.writeFileSync(file, JSON.stringify({ date: today, updateAvailable, remoteCommit }), { mode: 0o600 });
-    emit({ checked: true, updateAvailable, localCommit: local.stdout, remoteCommit });
+    const relation = classifyUpdate(local.stdout, remoteCommit, runGit);
+    const updateAvailable = relation === "behind";
+    const notes: Record<UpdateRelation, string> = {
+      equal: "已是最新版本。",
+      behind: "远端提交已证明领先本地。",
+      ahead: "本地提交领先远端，未发现可直接更新的版本。",
+      diverged: "本地与远端已分叉；请先评估差异，不直接更新。",
+      unknown: "无法确认提交先后关系（历史缺失、浅克隆或 Git 检查失败），未宣称有新版。",
+    };
+    if (relation !== "unknown") {
+      fs.mkdirSync(getStateDir(), { recursive: true });
+      fs.writeFileSync(file, JSON.stringify({ schema: 3, date: today, repoRoot, originFingerprint, localCommit: local.stdout,
+        updateAvailable, remoteCommit, relation }), { mode: 0o600 });
+    }
+    emit({ checked: relation !== "unknown", updateAvailable, relation,
+      localCommit: local.stdout, remoteCommit, note: notes[relation] });
   });
 
 // ---------------------------------------------------------------- session (ChatGPT conversation / Project memory)
