@@ -89,7 +89,7 @@ I am a non-technical user — do everything yourself:
 
 
 **Updates · 更新** — Update only when requested, following
-[maintenance](skill/references/maintenance.md). Read-only update discovery is not
+[maintenance](skill/references/maintenance.md). Update discovery may write its local diagnostic cache; it is not
 installation permission; preserve local customizations and existing safety holds. After the authorized checkout update/build, run the complete-directory helper with the saved previous source baseline; `c2c update-check` does not install the skill.
 仅在被要求时更新，不自动覆写本机客制内容；版本查询不等于安装授权。
 
