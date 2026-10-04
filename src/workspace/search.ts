@@ -2,7 +2,7 @@ import { spawn, spawnSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import readline from "node:readline";
-import { Workspace } from "./manager.js";
+import { Workspace, workspacePathInput } from "./manager.js";
 
 export interface SearchOptions {
   query: string;
@@ -67,118 +67,123 @@ export function resetRipgrepCache(): void {
   cachedRg = undefined;
 }
 
-async function searchWithRipgrep(
-  ws: Workspace,
-  rgBin: string,
-  searchAbs: string,
-  opts: SearchOptions,
-  limit: number
-): Promise<SearchResult> {
-  // One extra match per file is sufficient to detect global truncation.
-  const args = ["--json", "--max-filesize", "2M", "--max-count", String(limit + 1)];
-  if (!opts.regex) args.push("-F");
-  args.push("--smart-case");
-  if (opts.glob) args.push("-g", opts.glob);
-  args.push("--", opts.query, searchAbs);
+interface Candidate { abs: string; rel: string; requested: string }
 
-  return new Promise((resolvePromise, reject) => {
-    const child = spawn(rgBin, args, { cwd: ws.root, windowsHide: true });
-    const matches: SearchMatch[] = [];
-    let truncated = false;
-    const rl = readline.createInterface({ input: child.stdout });
-    rl.on("line", (line) => {
-      if (truncated) return;
-      try {
-        const event = JSON.parse(line) as {
-          type: string;
-          data?: { path?: { text?: string }; line_number?: number; lines?: { text?: string } };
-        };
-        if (event.type !== "match" || !event.data?.path?.text) return;
-        const rel = path.relative(ws.root, event.data.path.text).split(path.sep).join("/");
-        if (rel.startsWith("..") || ws.ignoreRules.isHidden(rel)) return;
-        // Metadata and hidden matches do not indicate omitted visible results.
-        if (matches.length >= limit) {
-          truncated = true;
-          child.kill("SIGTERM");
-          return;
+/** Enumerate metadata only. Content readers receive this vetted file set. */
+async function searchCandidates(ws: Workspace, requested: string): Promise<Candidate[]> {
+  const files: Candidate[] = [];
+  const visit = async (input: string): Promise<void> => {
+    try {
+      const { abs, rel } = ws.resolve(input);
+      const stat = await fs.promises.stat(abs);
+      if (ws.ignoreRules.isHidden(rel) || (stat.isDirectory() && rel !== "" && ws.ignoreRules.isHidden(rel + "/"))) return;
+      if (stat.isFile()) {
+        if (stat.size <= 2 * 1024 * 1024) files.push({ abs, rel, requested: input });
+      } else if (stat.isDirectory()) {
+        const entries = await fs.promises.readdir(abs, { withFileTypes: true });
+        for (const entry of entries) {
+          // Preserve existing no-follow behavior during recursive traversal.
+          if (entry.isDirectory() || entry.isFile()) await visit(path.join(input, entry.name));
         }
-        matches.push({
-          path: rel,
-          line: event.data.line_number ?? 0,
-          text: (event.data.lines?.text ?? "").trimEnd().slice(0, 500),
-        });
-      } catch {
-        // ignore malformed json lines
       }
-    });
+    } catch { /* denied, missing, or unreadable candidate */ }
+  };
+  await visit(workspacePathInput(requested));
+  return files;
+}
+
+async function globFiles(ws: Workspace, rgBin: string, searchAbs: string, glob: string): Promise<Set<string>> {
+  // Explicit file arguments bypass rg -g. Its filename-only traversal preserves
+  // rg's glob language; intersect this metadata with the authorized candidates.
+  return new Promise((resolve, reject) => {
+    const child = spawn(rgBin, ["--no-config", "--files", "--no-ignore", "--hidden", "--null", "-g", glob, "--", searchAbs],
+      { cwd: ws.root, windowsHide: true });
+    const chunks: Buffer[] = [];
+    child.stdout.on("data", chunk => chunks.push(Buffer.from(chunk)));
+    child.stderr.resume();
     child.on("error", reject);
-    child.on("close", () => {
-      resolvePromise({ matches, matchCount: matches.length, truncated, engine: "ripgrep" });
+    child.on("close", code => {
+      if (code !== 0 && code !== 1) return reject(new Error("ripgrep filename selection failed"));
+      resolve(new Set(Buffer.concat(chunks).toString("utf8").split("\0").filter(Boolean).map(file => path.resolve(ws.root, file))));
     });
   });
 }
 
-async function searchWithNode(
-  ws: Workspace,
-  searchAbs: string,
-  opts: SearchOptions,
-  limit: number
+async function searchWithRipgrep(
+  ws: Workspace, rgBin: string, searchAbs: string, candidates: Candidate[], opts: SearchOptions, limit: number
 ): Promise<SearchResult> {
+  const selected = opts.glob ? await globFiles(ws, rgBin, searchAbs, opts.glob) : null;
+  const matches: SearchMatch[] = [];
+  let truncated = false;
+  const batches: Candidate[][] = [];
+  let batch: Candidate[] = []; let bytes = 0;
+  for (const file of candidates) {
+    if (selected && !selected.has(file.abs)) continue;
+    const cost = Buffer.byteLength(file.abs) + 1;
+    if (batch.length && (batch.length >= 50 || bytes + cost > 32 * 1024)) { batches.push(batch); batch = []; bytes = 0; }
+    batch.push(file); bytes += cost;
+  }
+  if (batch.length) batches.push(batch);
+  for (const candidates of batches) {
+    const files = candidates.filter(file => {
+      try { return ws.resolve(file.requested).abs === file.abs && fs.statSync(file.abs).isFile(); } catch { return false; }
+    });
+    if (!files.length) continue; // Never invoke rg without files (stdin/directory fallback).
+    const allowed = new Map(files.map(file => [file.abs, file.rel]));
+    const args = ["--no-config", "--no-ignore", "--json", "--max-filesize", "2M", "--max-count", String(limit + 1)];
+    if (!opts.regex) args.push("-F");
+    args.push("--smart-case", "--", opts.query, ...files.map(file => file.abs));
+    await new Promise<void>((resolve, reject) => {
+      const child = spawn(rgBin, args, { cwd: ws.root, windowsHide: true });
+      const rl = readline.createInterface({ input: child.stdout });
+      child.stderr.resume();
+      rl.on("line", line => {
+        if (truncated) return;
+        try {
+          const event = JSON.parse(line) as { type: string; data?: { path?: { text?: string }; line_number?: number; lines?: { text?: string } } };
+          if (event.type !== "match" || !event.data?.path?.text) return;
+          const rel = allowed.get(path.resolve(ws.root, event.data.path.text));
+          if (rel === undefined) return;
+          if (matches.length >= limit) { truncated = true; child.kill("SIGTERM"); return; }
+          matches.push({ path: rel, line: event.data.line_number ?? 0,
+            text: (event.data.lines?.text ?? "").trimEnd().slice(0, 500) });
+        } catch { /* ignore malformed JSON lines */ }
+      });
+      child.on("error", reject);
+      child.on("close", code => {
+        if (!truncated && code !== 0 && code !== 1) reject(new Error("ripgrep content search failed"));
+        else resolve();
+      });
+    });
+    if (truncated) break;
+  }
+  return { matches, matchCount: matches.length, truncated, engine: "ripgrep" };
+}
+
+async function searchWithNode(ws: Workspace, candidates: Candidate[], opts: SearchOptions, limit: number): Promise<SearchResult> {
   const matcher = opts.regex ? new RegExp(opts.query, "i") : null;
   const needle = opts.query.toLowerCase();
   const globRegex = opts.glob ? globToRegex(opts.glob) : null;
   const matches: SearchMatch[] = [];
   let truncated = false;
-
-  const walk = async (dirAbs: string, dirRel: string): Promise<void> => {
-    if (truncated) return;
-    let entries: fs.Dirent[];
+  for (const file of candidates) {
+    if (globRegex && !globRegex.test(file.rel)) continue;
+    let content: string;
     try {
-      entries = await fs.promises.readdir(dirAbs, { withFileTypes: true });
-    } catch {
-      return;
-    }
-    for (const entry of entries) {
-      if (truncated) return;
-      const childRel = dirRel ? `${dirRel}/${entry.name}` : entry.name;
-      if (ws.ignoreRules.isHidden(childRel) || ws.ignoreRules.isHidden(childRel + "/")) continue;
-      const childAbs = path.join(dirAbs, entry.name);
-      if (entry.isDirectory()) {
-        await walk(childAbs, childRel);
-      } else if (entry.isFile()) {
-        if (globRegex && !globRegex.test(childRel)) continue;
-        let stat: fs.Stats;
-        try {
-          stat = await fs.promises.stat(childAbs);
-        } catch {
-          continue;
-        }
-        if (stat.size > 2 * 1024 * 1024) continue;
-        let content: string;
-        try {
-          content = await fs.promises.readFile(childAbs, "utf8");
-        } catch {
-          continue;
-        }
-        if (content.includes("\0")) continue;
-        const lines = content.split("\n");
-        for (let i = 0; i < lines.length; i++) {
-          const line = lines[i];
-          const hit = matcher ? matcher.test(line) : line.toLowerCase().includes(needle);
-          if (hit) {
-            if (matches.length >= limit) {
-              truncated = true;
-              return;
-            }
-            matches.push({ path: childRel, line: i + 1, text: line.trimEnd().slice(0, 500) });
-          }
-        }
+      if (ws.resolve(file.requested).abs !== file.abs) continue;
+      content = await fs.promises.readFile(file.abs, "utf8");
+    } catch { continue; }
+    if (content.includes("\0")) continue;
+    const lines = content.split("\n");
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      if (matcher ? matcher.test(line) : line.toLowerCase().includes(needle)) {
+        if (matches.length >= limit) { truncated = true; break; }
+        matches.push({ path: file.rel, line: i + 1, text: line.trimEnd().slice(0, 500) });
       }
     }
-  };
-
-  const startRel = path.relative(ws.root, searchAbs).split(path.sep).join("/");
-  await walk(searchAbs, startRel === "" ? "" : startRel);
+    if (truncated) break;
+  }
   return { matches, matchCount: matches.length, truncated, engine: "node" };
 }
 
@@ -200,13 +205,14 @@ export async function searchWorkspace(ws: Workspace, opts: SearchOptions): Promi
   }
   const limit = Math.min(200, Math.max(1, Math.floor(opts.limit ?? 50)));
   const { abs } = ws.resolve(opts.path ?? ".");
+  const candidates = await searchCandidates(ws, opts.path ?? ".");
   const rg = findRipgrep();
   if (rg) {
     try {
-      return await searchWithRipgrep(ws, rg, abs, opts, limit);
+      return await searchWithRipgrep(ws, rg, abs, candidates, opts, limit);
     } catch {
       // fall through to node engine
     }
   }
-  return searchWithNode(ws, abs, opts, limit);
+  return searchWithNode(ws, candidates, opts, limit);
 }

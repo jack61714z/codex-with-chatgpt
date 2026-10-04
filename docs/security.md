@@ -23,7 +23,7 @@
 | Token theft | Opaque high-entropy tokens; stored only as SHA-256 hashes; access tokens live 1 h; refresh tokens rotate on every use (replay of the old one fails); revocation endpoint + `c2c unpair` |
 | Workspace traversal | `realpath` canonicalization of the deepest existing ancestor; containment check against the canonical root; case-insensitive comparison on macOS/Windows; rejects `..`, absolute escapes, backslash tricks, null bytes |
 | Symlink escape | Canonicalization resolves symlinks before the containment check (file and directory symlinks both covered by tests) |
-| Sensitive files | Deny-by-default patterns (.env*, keys, SSH, cloud creds, keychains…) enforced at resolve time — reads, listings, and search all pass through the same gate; `git diff` adds pathspec excludes; `.env.example` allowed |
+| Sensitive files | Default patterns deny `.env*`, keys, credentials, `*.db`/`*.sqlite`/`*.sqlite3`/`*.session` and their `-wal`/`-shm`/`-journal` sidecars, and `session(s).json`/`token(s).json`. The canonical C2C state subtree is protected. Requested and canonical paths are checked before text/image reads; search enumerates metadata and sends only vetted regular files to either content reader. `.c2cignore` adds rules and fails closed if unsafe/unreadable; `.gitignore` is not authorization. Git output retains its shared sensitive-path filtering. `.env.example` remains allowed. |
 | Oversized file / diff DoS | read_file caps lines and bytes per response; git_diff paginates by byte offset with hard caps; search caps matches and file sizes |
 | Tunnel exposure | Bridge binds 127.0.0.1 only (refuses 0.0.0.0); the only public surface is HTTPS via the tunnel, protected by OAuth; `/health` reveals only a salted workspace hash |
 | Admin API abuse | Loopback-only + random admin token (0600 runtime file) + requests with proxy headers (`cf-connecting-ip`, `x-forwarded-for`) rejected; unauthenticated probes get 404 |
@@ -56,3 +56,10 @@ integration is a V2 item.
 Write files, delete files, run shell commands, commit, install packages —
 these tools do not exist on the server, so no prompt injection, scope bug, or
 UI confusion can enable them.
+
+The file policy is a filename/path boundary, not content classification. It does not
+claim protection for arbitrary renamed copies, hard links under allowed names, or
+hostile concurrent filesystem changes between validation and opening a file. Keep
+additional private material outside the connected workspace or exclude it with
+`.c2cignore`. Source files such as `src/auth.ts` and `src/db.ts`, SQL schemas and
+migrations, documentation, and test fixtures remain available.
