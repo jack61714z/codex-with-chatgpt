@@ -1,34 +1,27 @@
 # Codex with ChatGPT
 
-> ChatGPT thinks. Codex works.
-> ChatGPT 负责思考，Codex 负责干活。
+> Chat investigates, plans and reviews; Codex.app is the daily single repository writer.
+> 共同分工以 [collaboration policy](skill/references/collaboration-policy.md) 为准。
 
 > [!IMPORTANT]
-> **遇到问题？** 请先向 Codex 发送 **「更新 Codex with ChatGPT」** 并重试。更新到最新版本可以解决大多数已知问题。  
-> **Having trouble?** First ask Codex to **“Update Codex with ChatGPT”** and try again. Updating to the latest version resolves most known issues.
+> Diagnose the actual connection/load failure before updating. Preserve local policy customizations and platform safety holds; see [maintenance](skill/references/maintenance.md).
 
 ## The problem · 解决什么问题
 
 **中文** — ChatGPT 付费订阅的网页版额度大量闲置，Codex 却在消耗紧张的
 API 额度做规划和 Review。本项目把"思考"交给你已付费的网页版 ChatGPT，
-Codex 只负责执行。不用 API Key、不搞逆向代理——官方网页 + 只读 MCP 桥接。
+Codex.app 是日常 repo 唯一 writer；Chat 負責調查、規劃與審查。不用 API Key、不搞逆向代理——官方网页 + 只读 MCP 桥接。
 
 **EN** — ChatGPT Plus/Pro web quota sits idle while your coding agent burns
 scarce API/Codex tokens on planning and review. This project moves the
-thinking to the subscription you already pay for; Codex only executes.
+investigation, planning and review to Chat; Codex.app is the daily single repository writer.
 No API keys, no reverse proxy — official web UI plus a read-only MCP bridge.
 
 ## What it is · 这是什么
 
-**中文** — 把 ChatGPT 网页版变成 Codex 编码会话的"规划与审查大脑"，执行权
-完全保留在 Codex 手里。你的仓库永远不会被上传：ChatGPT 通过一条安全的、
-OAuth 保护的**只读** MCP 连接，按需读取当前工作区里它真正需要的那几行代码。
+**中文** — C2C 提供安全的只读 workspace 连接与小型控制讯息。它不会把 Chat 固定成唯读角色；其他已授权 GitHub/RDC 能力仍按共同政策使用。
 
-**EN** — Use the ChatGPT web app as the planning and review brain for your
-Codex coding sessions, while Codex keeps full ownership of execution. Your
-repository is never uploaded: ChatGPT reads exactly the lines it needs through
-a secure, OAuth-protected, **read-only** MCP connection to your current
-workspace.
+**EN** — C2C supplies a secure read-only workspace connection and small control messages. This bridge limitation does not define Chat's other authorized capabilities. File evidence is commit-first; bounded authorized RDC reads supplement local context.
 
 Detailed docs below are in English · 详细中文文档见 **[README.zh-CN.md](README.zh-CN.md)**
 
@@ -38,22 +31,25 @@ Detailed docs below are in English · 详细中文文档见 **[README.zh-CN.md](
 编码 Agent（Codex），然后去倒杯咖啡：
 
 ```text
-请帮我完整安装并配置 Codex with ChatGPT，全程自动，我是不懂技术的小白，
+请帮我完整安装并配置 Codex with ChatGPT，尽量自动完成，我是不懂技术的小白，
 所有事情你自己做：
 
 1. 环境自检：需要 git 和 Node.js ≥ 20，缺什么就自动安装
   （macOS 用 Homebrew，Windows 用 winget），同时安装 cloudflared。
-2. 下载：把 https://github.com/XiaoDuoYa/codex-with-chatgpt 克隆到
-   ~/codex-with-chatgpt（已存在就 git pull 更新）。
+2. 下载：把 https://github.com/jack61714z/codex-with-chatgpt 克隆到
+   ~/codex-with-chatgpt（已存在则先检查本机变更与版本，按 maintenance 处理；不要自动覆盖）。
 3. 构建：在该目录里执行 corepack pnpm install 和 corepack pnpm build。
 4. 安装 Skill：先确定 Codex home：如果设置了非空的 CODEX_HOME 就使用它，
    否则使用 ~/.codex（Windows 默认为 %USERPROFILE%\.codex）。把仓库里的
-   skill/SKILL.md 复制到 <codex-home>/skills/codex-with-chatgpt/SKILL.md，
-   并把文件中 "The codex-with-chatgpt checkout lives at:" 那一行的路径改成实际克隆路径。
-5. 首次配置：按 SKILL.md 里的 first-time setup 流程执行
+   从 checkout root 按 references/maintenance.md 运行完整目录 helper：
+   node scripts/install-skill.mjs ./skill <codex-home>/skills/codex-with-chatgpt [saved-previous-source-skill]
+   已有安装使用保存的旧 source 作基准，保留现有机器专用 launcher 规则与回复点。
+   若此安装曾遭平台安全拒绝，先走正式 clearance，不重放写入。
+5. 首次配置：先读 SKILL.md 入口，再按 references/connection-and-recovery.md
+   的 first-time setup 流程执行
   （运行 c2c setup，用内置浏览器打开 ChatGPT 配置连接器并输入配对码）。
    全程只用内置浏览器，禁止打开任何第三方浏览器。
-6. 只有遇到需要我登录（ChatGPT / Cloudflare）、验证码或两步验证时才叫我，
+6. 首次连接方式、配置模式、创建 Project、个人同意或手动配置需要我决定时，以及登录（ChatGPT / Cloudflare）、验证码或两步验证时叫我，
    而且一次只告诉我一个动作。
 7. 完成后给我看 ✓ 清单，并确认文件读取测试通过。我不懂 MCP、OAuth、
    Tunnel、端口这些词，不要向我解释；出了问题先自己修。
@@ -64,23 +60,27 @@ Detailed docs below are in English · 详细中文文档见 **[README.zh-CN.md](
 paragraph below, paste it to your coding agent (Codex), and go grab a coffee:
 
 ```text
-Please install and configure "Codex with ChatGPT" for me, fully automatically.
+Please install and configure "Codex with ChatGPT" for me, with routine steps automated.
 I am a non-technical user — do everything yourself:
 
 1. Check the environment: git and Node.js >= 20 must be available. Install
    anything missing yourself (macOS: Homebrew, Windows: winget). Also install
    cloudflared.
-2. Download: clone https://github.com/XiaoDuoYa/codex-with-chatgpt into
-   ~/codex-with-chatgpt (if it already exists, git pull to update).
+2. Download: clone https://github.com/jack61714z/codex-with-chatgpt into
+   ~/codex-with-chatgpt (if present, inspect local changes/version and follow maintenance; do not overwrite automatically).
 3. Build: inside that folder run `corepack pnpm install` then `corepack pnpm build`.
 4. Install the Skill: determine the Codex home first: use a non-empty CODEX_HOME
-   when set, otherwise use ~/.codex (%USERPROFILE%\.codex on Windows). Copy
-   skill/SKILL.md to <codex-home>/skills/codex-with-chatgpt/SKILL.md, and update
-   the line "The codex-with-chatgpt checkout lives at:" to the actual clone path.
-5. First-time setup: follow the SKILL.md "first-time setup" workflow
+   when set, otherwise use ~/.codex (%USERPROFILE%\.codex on Windows). From
+   the checkout root, follow references/maintenance.md and run
+   node scripts/install-skill.mjs ./skill <codex-home>/skills/codex-with-chatgpt [saved-previous-source-skill]
+   Existing installs use the saved previous source baseline; preserve backups
+   and machine-specific launcher rules. If this installation was
+   safety-denied, obtain formal clearance rather than replaying the write.
+5. First-time setup: read the SKILL.md entry, then follow the
+   references/connection-and-recovery.md "first-time setup" workflow
    (run c2c setup, configure the ChatGPT connector in the BUILT-IN browser,
    enter the pairing code). Never open a third-party browser.
-6. Only interrupt me for logins (ChatGPT / Cloudflare), CAPTCHAs or 2FA —
+6. Involve me for initial connection/setup-mode choices, Project creation, personal consent or guided manual setup, and logins (ChatGPT / Cloudflare), CAPTCHAs or 2FA —
    and give me exactly ONE action at a time.
 7. When done, show me the ✓ checklist and confirm the file-read test passed.
    I don't know what MCP, OAuth, tunnels or ports are. Don't explain them.
@@ -88,10 +88,10 @@ I am a non-technical user — do everything yourself:
 ```
 
 
-**Updates · 更新** — The Skill checks GitHub once a day and updates itself when a
-new version is released; no action needed. You can also say "更新 Codex with ChatGPT"
-anytime. / Skill 每天自动检查一次 GitHub，有新版本会自动更新，无需任何操作；
-也可以随时对 Codex 说"更新 Codex with ChatGPT"。
+**Updates · 更新** — Update only when requested, following
+[maintenance](skill/references/maintenance.md). Read-only update discovery is not
+installation permission; preserve local customizations and existing safety holds. After the authorized checkout update/build, run the complete-directory helper with the saved previous source baseline; `c2c update-check` does not install the skill.
+仅在被要求时更新，不自动覆写本机客制内容；版本查询不等于安装授权。
 
 ---
 
@@ -103,13 +103,14 @@ anytime. / Skill 每天自动检查一次 GitHub，有新版本会自动更新�
 Let `<codex-home>` be a non-empty `CODEX_HOME` when set; otherwise use `~/.codex`
 (`%USERPROFILE%\.codex` on Windows).
 
-1. Install the Codex Skill: copy `skill/` to `<codex-home>/skills/codex-with-chatgpt/`.
+1. Install/update the complete `skill/` tree with `node scripts/install-skill.mjs ./skill <codex-home>/skills/codex-with-chatgpt [saved-previous-source-skill]`, following [maintenance](skill/references/maintenance.md). Replace the checkout path in `references/connection-and-recovery.md` and preserve machine-specific launcher rules. A prior safety denial still requires formal clearance.
 2. Tell Codex: **"Set up Codex with ChatGPT."** (中文: "使用 Codex with ChatGPT 完成首次配置。")
 3. Use Codex normally: **"Use Codex with ChatGPT to implement XXX."**
 
 > **Installation scope:** This repository does not publish or install a Codex
 > Web GPT, launcher, or model-catalog entry. Installation consists of building
-> this checkout, installing `skill/SKILL.md` as a Codex Skill, and running
+> this checkout, installing the complete `skill/` directory with its references
+> as a Codex Skill, preserving local launcher rules, and running
 > `c2c setup` to configure the ChatGPT connector. For Web GPT or model-catalog
 > problems, see [troubleshooting](docs/troubleshooting.md).
 
@@ -185,9 +186,7 @@ Credentials stay in the OS app state directory, not in the project.
   tools: `workspace_info`, `list_directory`, `read_file`, `search_workspace`,
   `git_status`, `git_diff`, `test_status`, `execution_summary`,
   `execution_output`, `read_image`.
-- **Independent review**: after Codex executes, ChatGPT inspects the actual
-  git diff and test records through MCP — it never trusts "all tests passed"
-  claims blindly.
+- **System review**: Chat reads actual committed changes and necessary affected context against original requirements in both directions. Receipts, digests and green tests do not alone prove acceptance. Local commits without a push have no remote audit record.
 
 ### Generated media handoff
 
@@ -221,7 +220,7 @@ Full threat model: [docs/security.md](docs/security.md)
 ```bash
 pnpm install
 pnpm build          # -> dist/, exposes the `c2c` bin
-pnpm test           # vitest: 150 tests (path security, OAuth, pairing, MCP e2e)
+pnpm test           # vitest: relevant suite (path security, OAuth, pairing, MCP e2e)
 
 c2c setup           # bridge + tunnel + pairing code, all in one
 c2c sandbox-allow   # whitelist the settings dir in Codex (macOS + Windows)
@@ -240,7 +239,7 @@ Docs: [architecture](docs/architecture.md) · [protocol](docs/protocol.md) ·
 ```
 src/
   bridge/     loopback HTTP server, port recovery, admin API
-  mcp/        9 read-only tools, stateless Streamable HTTP
+  mcp/        10 read-only tools, stateless Streamable HTTP
   auth/       OAuth 2.1 (PKCE, DCR, refresh rotation, revocation)
   pairing/    one-time pairing codes (CSPRNG, TTL, rate limits)
   workspace/  path containment, sensitive-file policy, search, git
@@ -273,3 +272,5 @@ connector setup, zero-touch first-run experience.
    <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=xiaoduoya/codex-with-chatgpt&type=date&legend=top-left" />
  </picture>
 </a>
+
+For complete local text installation/update with customization preservation, use `node scripts/install-skill.mjs ./skill <destination> [saved-previous-source-skill]` after saving a recovery copy; see [maintenance](skill/references/maintenance.md). Full records use [canonical format 1.0.1 / package 0.3.2](skill/references/full-format.md). This is the contract version, not a C2C runtime package version bump.

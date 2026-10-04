@@ -12,8 +12,8 @@ ChatGPT 付费订阅的网页版额度大量闲置，Codex 却在消耗紧张的
 
 ## 这是什么
 
-把 ChatGPT 网页版变成 Codex 编码会话的"规划与审查大脑"，而执行权完全保留在
-Codex 手里。你的仓库永远不会被上传——ChatGPT 通过一条安全的、OAuth 保护的
+把 ChatGPT 网页版变成 Codex 编码会话的"规划与审查大脑"，由 Codex.app 作为日常唯一仓库写入者；用户可明确指定有边界的执行例外。
+你的仓库永远不会被上传——ChatGPT 通过一条安全的、OAuth 保护的
 **只读** MCP 连接，按需读取当前工作区里它真正需要的那几行代码。
 
 ## 一段话安装（纯小白专用）
@@ -22,41 +22,41 @@ Codex 手里。你的仓库永远不会被上传——ChatGPT 通过一条安全
 Agent（Codex），然后去倒杯咖啡：
 
 ```text
-请帮我完整安装并配置 Codex with ChatGPT，全程自动，我是不懂技术的小白，
+请帮我完整安装并配置 Codex with ChatGPT，尽量自动完成，我是不懂技术的小白，
 所有事情你自己做：
 
 1. 环境自检：需要 git 和 Node.js ≥ 20，缺什么就自动安装
   （macOS 用 Homebrew，Windows 用 winget），同时安装 cloudflared。
-2. 下载：把 https://github.com/XiaoDuoYa/codex-with-chatgpt 克隆到
-   ~/codex-with-chatgpt（已存在就 git pull 更新）。
+2. 下载：把 https://github.com/jack61714z/codex-with-chatgpt 克隆到
+   ~/codex-with-chatgpt（已存在则先检查本机变更与版本，按 maintenance 处理；不要自动覆盖）。
 3. 构建：在该目录里执行 corepack pnpm install 和 corepack pnpm build。
 4. 安装 Skill：先确定 Codex home：如果设置了非空的 CODEX_HOME 就使用它，
    否则使用 ~/.codex（Windows 默认为 %USERPROFILE%\.codex）。把仓库里的
-   skill/SKILL.md 复制到 <codex-home>/skills/codex-with-chatgpt/SKILL.md，
-   并把文件中 "The codex-with-chatgpt checkout lives at:" 那一行的路径改成实际克隆路径。
-5. 首次配置：按 SKILL.md 里的 first-time setup 流程执行
+   从 checkout root 按 references/maintenance.md 运行完整目录 helper：
+   node scripts/install-skill.mjs ./skill <codex-home>/skills/codex-with-chatgpt [saved-previous-source-skill]
+   已有安装使用保存的旧 source 作基准，保留现有 launcher 自订内容与回复点；不只复制 SKILL.md。
+5. 首次配置：先读 SKILL.md，再按 references/connection-and-recovery.md 的 first-time setup 流程执行
   （运行 c2c setup，用内置浏览器打开 ChatGPT 配置连接器并输入配对码）。
    全程只用内置浏览器，禁止打开任何第三方浏览器。
-6. 只有遇到需要我登录（ChatGPT / Cloudflare）、验证码或两步验证时才叫我，
+6. 首次连接方式、配置模式、创建 Project、个人同意或手动配置需要我决定时，以及登录（ChatGPT / Cloudflare）、验证码或两步验证时叫我，
    而且一次只告诉我一个动作。
 7. 完成后给我看 ✓ 清单，并确认文件读取测试通过。我不懂 MCP、OAuth、
    Tunnel、端口这些词，不要向我解释；出了问题先自己修。
 ```
 
-**更新**：Skill 每天自动检查一次 GitHub，有新版本会自动更新并继续任务，
-无需任何操作；也可以随时对 Codex 说"更新 Codex with ChatGPT"。
+**更新**：仅在被要求时按 [maintenance](skill/references/maintenance.md) 更新；先保存旧 source 与安装回复点，再运行完整目录 helper。`c2c update-check` 只查询版本，不安装或更新 skill，不授权覆写自订内容。
 
 ## 安装 → 配置 → 使用（手动版）
 
 设 `<codex-home>` 为：如果 `CODEX_HOME` 已设置且非空，则使用 `CODEX_HOME`；
 否则使用 `~/.codex`（Windows 上默认为 `%USERPROFILE%\.codex`）。
 
-1. 安装 Codex Skill：把 `skill/` 复制到 `<codex-home>/skills/codex-with-chatgpt/`。
+1. 安装／更新 Codex Skill：按 [maintenance](skill/references/maintenance.md) 运行 `node scripts/install-skill.mjs ./skill <codex-home>/skills/codex-with-chatgpt [saved-previous-source-skill]`，完整安装 references/templates 并保留自订内容。
 2. 对 Codex 说：**"使用 Codex with ChatGPT 完成首次配置。"**
 3. 之后正常使用：**"使用 Codex with ChatGPT，帮我实现 XXX。"**
 
 > **安装范围：** 本项目不会发布或安装 Codex 网页版 GPT、启动器或模型目录条目。
-> 安装内容是构建本仓库、把 `skill/SKILL.md` 安装为 Codex Skill，然后运行
+> 安装内容是构建本仓库、把完整 `skill/`（含 references/）安装为 Codex Skill，然后运行
 > `c2c setup` 配置 ChatGPT 连接器。网页版 GPT 或模型目录的问题请先查看
 > [故障排查](docs/troubleshooting.md)。
 
@@ -110,14 +110,14 @@ Ready.
                                               └─────────────────────┘
 ```
 
-- **控制面（Computer Use）**：Codex 与 ChatGPT 之间只交换极小的结构化 `[C2C]`
+- **控制面（内置浏览器）**：Codex 与 ChatGPT 之间只交换极小的结构化 `[C2C]`
   状态消息——`INIT → PLAN → EXECUTED → REVIEW → DONE`。绝不粘贴 diff、日志
   或文件内容。
 - **数据面（MCP）**：ChatGPT 缺什么自己拉什么，共 10 个只读工具：
   `workspace_info`、`list_directory`、`read_file`、`search_workspace`、
   `git_status`、`git_diff`、`test_status`、`execution_summary`、
   `execution_output`、`read_image`。
-- **独立审查**：Codex 执行完毕后，ChatGPT 通过 MCP 亲自检查真实的 git diff
+- **独立审查**：Codex 执行完毕后，ChatGPT 以授权仓库的 pushed commit 为主要证据，结合必要上下文与 C2C 元数据亲自检查累积变更
   和测试记录——绝不因为 Codex 说"测试全过"就直接相信。
 
 ### 生成媒体交接
@@ -147,7 +147,7 @@ Ready.
 ```bash
 pnpm install
 pnpm build          # 产出 dist/，暴露 c2c 命令
-pnpm test           # vitest：150 个测试（路径安全、OAuth、配对、MCP 端到端）
+pnpm test           # vitest：相关测试套件（路径安全、OAuth、配对、MCP 端到端）
 
 c2c setup           # 一条命令：Bridge + 隧道 + 配对码
 c2c sandbox-allow   # 把本地设置目录加入 Codex 沙箱白名单（macOS / Windows）
@@ -166,7 +166,7 @@ c2c status / doctor / pair / unpair / logs / stop
 ```
 src/
   bridge/     本机回环 HTTP 服务、端口自动恢复、管理 API
-  mcp/        9 个只读工具、无状态 Streamable HTTP
+  mcp/        10 个只读工具、无状态 Streamable HTTP
   auth/       OAuth 2.1（PKCE、动态注册、refresh 轮换、吊销）
   pairing/    一次性配对码（CSPRNG、TTL、限速）
   workspace/  路径收敛、敏感文件策略、搜索、git
@@ -189,3 +189,5 @@ V1。已端到端验证：Bridge、OAuth + 配对、公网隧道、ChatGPT 连�
 ## 许可证
 
 [MIT](LICENSE)
+
+For complete local text installation/update with customization preservation, use `node scripts/install-skill.mjs ./skill <destination> [saved-previous-source-skill]` after saving a recovery copy; see [maintenance](skill/references/maintenance.md). Full records use [canonical format 1.0.1 / package 0.3.2](skill/references/full-format.md). This is the contract version, not a C2C runtime package version bump.
