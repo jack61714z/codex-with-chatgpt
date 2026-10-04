@@ -1,13 +1,14 @@
 # Troubleshooting
 
-First move, always:
+At the first meaningful failure, preserve the symptom, timestamp and current state and use Progressive Investigation under the [shared policy](../skill/references/collaboration-policy.md). Distinguish instruction/catalog/browser failures from local bridge faults before repair. A new attempt needs new evidence and a changed strategy; a retry cap never authorizes an identical blind repeat.
+
+For a suspected local connection fault, use the following diagnostic only within existing authorization for local state reads and endpoint persistence:
 
 ```
-c2c doctor
+c2c doctor --no-fix --json -w <workspace>
 ```
 
-It checks Node, workspace, bridge, MCP, OAuth and tunnel — and repairs what it
-can (restarts the bridge, restarts the tunnel) without asking.
+`--no-fix` disables repair actions; it does not guarantee read-only execution. A healthy tunnel can still persist endpoint metadata and refresh its `savedAt` timestamp. Doctor/status diagnostics read runtime state and can use the local admin token internally; never inspect or disclose that token. For strictly read-only inspection without runtime or credential access, inspect source and nonsecret repository metadata instead. Doctor without `--no-fix` can restart the bridge/tunnel and edit local configuration. Use repair only for a diagnosed fault within existing authorization; preserve uncertain-state and denial gates. A healthy local bridge is not permission to recreate a connector for browser/catalog/instruction loading problems.
 
 ## Common situations
 
@@ -37,10 +38,10 @@ incomplete, separate route installation from catalog verification:
   state.
 
 For the C2C repository itself, verify the checkout and installed Skill path,
-rebuild with `corepack pnpm install && corepack pnpm build`, then run:
+rebuild with `corepack pnpm install && corepack pnpm build` when authorized, then run these ordinary diagnostics only within authorization for runtime reads and possible endpoint persistence:
 
 ```
-c2c doctor --json -w <workspace>
+c2c doctor --no-fix --json -w <workspace>
 c2c status --json -w <workspace>
 ```
 
@@ -76,13 +77,12 @@ Same as above: `c2c doctor`, then Delete + recreate THIS workspace's
 connector if `chatgptRepair.needed`. Mint a pairing code with `c2c pair` only
 when the Authorize form is on screen.
 If this workspace uses a stable hostname, doctor sets `namedRepair` instead —
-re-login to Cloudflare (`c2c tunnel login`) and doctor again. Do not Delete
+re-login to Cloudflare (`c2c tunnel login`) only under the connection reference’s explicit browser-consent condition, and doctor again. Do not Delete
 the connector; the address did not change.
 
 ### I have a Cloudflare domain and want a stable hostname
 During first-time setup (or the next coding session, once), say you have a
-Cloudflare account and give the domain. Codex opens a browser for Cloudflare
-login, then keeps `c2c-<project>.your-domain.com`. To stay on the temporary
+Cloudflare account and give the domain. Cloudflare login follows the explicit browser-consent condition in [connection and recovery](../skill/references/connection-and-recovery.md); a domain choice alone does not authorize opening your own browser. After authorized login, C2C keeps `c2c-<project>.your-domain.com`. To stay on the temporary
 address, say you do not have a domain. Switching later: tell Codex you want
 the stable hostname; it runs `c2c tunnel choose --mode named --zone <domain>`.
 
@@ -161,11 +161,6 @@ Do not pick another project by name automatically. Open the collection that
 matches this workspace and tell Codex「已找到」, or say you want the old
 long-chat instead. Each workspace has its own Project and its own connector.
 
-### Completely stuck
-```
-c2c stop
-c2c setup
-```
+### Diagnosed bridge recovery remains blocked
 
-re-creates the bridge, tunnel and pairing session from scratch. Existing
-authorizations stay valid unless you also ran `c2c unpair`.
+Preserve Doctor evidence and the current bindings/checkpoint. Return an unresolved cause to Chat; do not reset merely because progress stalled. Only when evidence identifies bridge recovery as necessary and that effect is authorized may the existing recovery workflow use `c2c stop` / `c2c setup`. Never use that sequence for an instruction/catalog problem, an uncertain running process or an access denial. No blind second wave, deletion of unrelated connectors, or trust/permission workaround.

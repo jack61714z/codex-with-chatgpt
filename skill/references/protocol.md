@@ -1,6 +1,6 @@
 # C2C Agent Protocol
 
-Follow [the shared policy](../skill/references/collaboration-policy.md). Control messages carry metadata; file evidence uses authorized pushed commits, with authorized RDC for exact local context. Preserve workspace binding and security/recovery gates.
+Follow [the shared policy](collaboration-policy.md). Control messages carry metadata; file evidence uses authorized pushed commits, with authorized RDC for exact local context. Preserve workspace binding and security/recovery gates.
 
 ## States and continuation
 
@@ -28,7 +28,7 @@ These lines describe separate lifecycle steps, not a script to run in one batch.
 
 ## Scoped assignment and full records
 
-Chat investigates, plans and reviews; Codex.app is the daily single repository writer. A direct user assignment may explicitly select a different actual executor for this task only. PLAN binds original goal, scope, effects and checks through a full [WORK_ORDER](../skill/references/full-format.md). Use the same canonical contract for EXECUTION_RESULT and CHAT_REVIEW; it is a document contract, not CLI/schema/state changes.
+Chat investigates, plans and reviews; Codex.app is the daily single repository writer. A direct user assignment may explicitly select a different actual executor for this task only. PLAN binds original goal, scope, effects and checks through a full [WORK_ORDER](full-format.md). Use the same canonical contract for EXECUTION_RESULT and CHAT_REVIEW; it is a document contract, not CLI/schema/state changes.
 
 Full sanitized records use the verified authorized owning GitHub work item and exact saved comment URLs. If no destination or publication authority is verified, prepare the full record in the existing authorized conversation, mark its durable link UNKNOWN, and report that limited delivery gap. Local evidence may supplement that conversation record; it is not a prerequisite. Do not invent URLs. Chat must read original requirements, cumulative actual changes and affected context, then answer all seven axes with substantive evidence. Tests alone do not establish acceptance.
 
