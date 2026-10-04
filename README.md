@@ -204,8 +204,13 @@ SVG content, and never overwrite an existing file.
 - **One workspace = one boundary**: every token is bound to a single workspace;
   path containment uses canonical realpaths (symlink/`../`/absolute-path escapes
   are all blocked and tested).
-- **Sensitive files never leave**: `.env*`, keys, SSH, credentials are denied by
-  default (`.env.example` allowed); `.c2cignore` adds your own rules.
+- **Sensitive-file policy**: `.env*`, keys, SSH, credentials, database/session files
+  and their SQLite sidecars, and `session(s).json`/`token(s).json` are denied by
+  default (`.env.example` allowed). The canonical C2C state directory is protected
+  when inside the workspace. `.c2cignore` adds rules; `.gitignore` is not an access
+  policy. Requested aliases and canonical targets are checked before file content
+  reads, including search. Arbitrarily renamed copies and concurrent filesystem
+  changes are outside this filename-based boundary.
 - **Knowing the URL grants nothing**: the public MCP endpoint requires OAuth 2.1
   (PKCE S256, dynamic client registration, rotating refresh tokens). Without a
   token: 401. Wrong workspace: 403.

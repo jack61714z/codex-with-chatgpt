@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { createHash } from "node:crypto";
 import readline from "node:readline";
-import { IgnoreRules } from "./ignore.js";
+import { IgnoreRules, canonicalPath } from "./ignore.js";
 import { readJsonIfExists } from "../config/paths.js";
 
 export type WorkspaceErrorCode =
@@ -81,6 +81,13 @@ const DEFAULT_MAX_LINES = 400;
 const HARD_MAX_LINES = 2000;
 const DEFAULT_MAX_BYTES = 256 * 1024;
 
+/** Normalize the model's workspace alias while retaining the requested path. */
+export function workspacePathInput(requested: string): string {
+  let input = requested.trim().replace(/\\/g, "/").replace(/^workspace:\/*/i, "");
+  if (input === "" || input === "/") input = ".";
+  return input;
+}
+
 export class Workspace {
   readonly root: string;
   readonly id: string;
@@ -102,7 +109,7 @@ export class Workspace {
     this.root = real;
     this.id = createHash("sha256").update(normCase(real)).digest("hex").slice(0, 12);
     this.ignoreRules = new IgnoreRules(real);
-    this.projectConfig = parseProjectConfig(readJsonIfExists<unknown>(path.join(real, ".c2c.json")));
+    this.projectConfig = parseProjectConfig(this.readMetadataJson(".c2c.json"));
     this.name = this.projectConfig.name ?? path.basename(real);
   }
 
@@ -112,24 +119,8 @@ export class Workspace {
     return c === r || c.startsWith(r + path.sep);
   }
 
-  /**
-   * Canonicalize a path by realpath-ing its deepest existing ancestor.
-   * Defends against symlink escapes even for not-yet-existing leaf segments.
-   */
-  private canonicalize(abs: string): string {
-    let current = abs;
-    const suffix: string[] = [];
-    for (;;) {
-      try {
-        const real = fs.realpathSync.native(current);
-        return suffix.length > 0 ? path.join(real, ...suffix) : real;
-      } catch {
-        const parent = path.dirname(current);
-        if (parent === current) return abs;
-        suffix.unshift(path.basename(current));
-        current = parent;
-      }
-    }
+  private readMetadataJson(requested: string): unknown {
+    try { return readJsonIfExists<unknown>(this.resolve(requested).abs); } catch { return null; }
   }
 
   /**
@@ -140,16 +131,10 @@ export class Workspace {
     if (typeof requested !== "string" || requested.includes("\0")) {
       throw new WorkspaceError("INVALID_PATH", "Invalid path");
     }
-    let p = requested.trim();
-    if (p === "" || p === "/") p = ".";
-    // Normalize separators so Windows-style input behaves identically everywhere.
-    p = p.replace(/\\/g, "/");
-    // Strip a "workspace:/" alias prefix if the model echoes it back.
-    p = p.replace(/^workspace:\/*/i, "");
-    if (p === "") p = ".";
+    const p = workspacePathInput(requested);
 
     const abs = path.resolve(this.root, p);
-    const canonical = this.canonicalize(abs);
+    const canonical = canonicalPath(abs);
     if (!this.contains(canonical)) {
       throw new WorkspaceError(
         "PATH_OUTSIDE_WORKSPACE",
@@ -160,7 +145,12 @@ export class Workspace {
     if (rel.startsWith("..")) {
       throw new WorkspaceError("PATH_OUTSIDE_WORKSPACE", `Path resolves outside the connected workspace: ${requested}`);
     }
-    if (!opts.allowSensitive && rel !== "" && this.ignoreRules.isSensitive(rel)) {
+    const requestedRel = path.relative(this.root, abs).split(path.sep).join("/");
+    let directory = false;
+    try { directory = fs.statSync(canonical).isDirectory(); } catch { /* missing leaf */ }
+    const denied = (value: string) => this.ignoreRules.isSensitive(value) ||
+      (directory && value !== "" && this.ignoreRules.isSensitive(value + "/"));
+    if (!opts.allowSensitive && (denied(rel) || (this.contains(abs) && denied(requestedRel)))) {
       throw new WorkspaceError(
         "ACCESS_DENIED_SENSITIVE_FILE",
         `ACCESS_DENIED_SENSITIVE_FILE: '${rel}' matches the sensitive-file policy and cannot be read.`
@@ -264,7 +254,7 @@ export class Workspace {
     const offset = Math.max(0, Math.floor(opts.offset ?? 0));
 
     const all: DirEntry[] = [];
-    const walk = async (dirAbs: string, dirRel: string, level: number): Promise<void> => {
+    const walk = async (dirAbs: string, dirRel: string, level: number, requestedDir: string): Promise<void> => {
       let entries: fs.Dirent[];
       try {
         entries = await fs.promises.readdir(dirAbs, { withFileTypes: true });
@@ -277,11 +267,13 @@ export class Workspace {
         return ad !== bd ? ad - bd : a.name.localeCompare(b.name);
       });
       for (const entry of entries) {
+        const childRequested = path.join(requestedDir, entry.name);
+        try { this.resolve(childRequested); } catch { continue; }
         const childRel = dirRel ? `${dirRel}/${entry.name}` : entry.name;
         if (this.ignoreRules.isHidden(childRel) || this.ignoreRules.isHidden(childRel + "/")) continue;
         if (entry.isDirectory()) {
           all.push({ path: childRel + "/", type: "dir" });
-          if (level < depth) await walk(path.join(dirAbs, entry.name), childRel, level + 1);
+          if (level < depth) await walk(path.join(dirAbs, entry.name), childRel, level + 1, childRequested);
         } else if (entry.isFile()) {
           let size: number | undefined;
           try {
@@ -294,7 +286,7 @@ export class Workspace {
         if (all.length >= offset + limit + 2000) return; // hard cap for huge trees
       }
     };
-    await walk(abs, rel, 1);
+    await walk(abs, rel, 1, workspacePathInput(requested));
 
     const page = all.slice(offset, offset + limit);
     return {
@@ -325,7 +317,7 @@ export class Workspace {
     if (has("package.json")) {
       projectType = "node";
       languages.add("JavaScript");
-      const rawPackage = readJsonIfExists<unknown>(path.join(this.root, "package.json"));
+      const rawPackage = this.readMetadataJson("package.json");
       const pkg = rawPackage && typeof rawPackage === "object" && !Array.isArray(rawPackage)
         ? rawPackage as Record<string, unknown>
         : {};
