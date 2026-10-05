@@ -278,4 +278,4 @@ connector setup, zero-touch first-run experience.
  </picture>
 </a>
 
-For complete local text installation/update with customization preservation, use `node scripts/install-skill.mjs ./skill <destination> [saved-previous-source-skill]` after saving a recovery copy; see [maintenance](skill/references/maintenance.md). Full records use [canonical format 1.0.1 / package 0.3.2](skill/references/full-format.md). This is the contract version, not a C2C runtime package version bump.
+For complete local text installation/update with customization preservation, use `node scripts/install-skill.mjs ./skill <destination> [saved-previous-source-skill]` after saving a recovery copy; see [maintenance](skill/references/maintenance.md). Full records use [canonical format 1.0.1 / package 0.3.3](skill/references/full-format.md). This is the contract version, not a C2C runtime package version bump.

@@ -1,7 +1,7 @@
 # Canonical full work-order / result / review format
 
 FORMAT_VERSION: 1.0.1
-PACKAGE_VERSION: 0.3.2
+PACKAGE_VERSION: 0.3.3
 
 This is the single canonical contract for both Chat and Codex. Read it together with [the shared policy](collaboration-policy.md). All three full records use the common binding below. The Markdown field names are a document contract, not new C2C CLI flags, runtime schema fields, protocol states, cursors, epochs, or an additional review phase. Preserve the installed implementation's actual schema; use supported text/pointer fields for these records.
 

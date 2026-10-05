@@ -5,7 +5,7 @@ describe("static document contract (not host behavior)", () => {
   it("ships canonical full records and literal drift question", () => {
     const full = fs.readFileSync("skill/references/full-format.md", "utf8");
     expect(full).toContain("FORMAT_VERSION: 1.0.1");
-    expect(full).toContain("PACKAGE_VERSION: 0.3.2");
+    expect(full).toContain("PACKAGE_VERSION: 0.3.3");
     expect(full).toContain("Chat，請依原始目標與累積變更實際審查：是否造成整體飄移？");
     for (const axis of ["original_goal", "scope", "interfaces", "architecture", "workflow_ownership", "runtime_data_security", "related_dependencies"]) expect(full).toContain(`AXIS: ${axis}`);
     expect(full).toContain("never substitute for ITERATION");
@@ -103,4 +103,15 @@ it("recognizes native and Windows connection-reference paths (portable inputs, n
   expect(isConnectionReference(path.win32.join("references", "connection-and-recovery.md"))).toBe(true);
   expect(isConnectionReference(path.posix.join("references", "connection-and-recovery.md"))).toBe(true);
   expect(isConnectionReference(path.win32.join("references", "protocol.md"))).toBe(false);
+});
+
+it("entry and policy retain the accepted whole-drift definition", () => {
+  for (const file of ["skill/SKILL.md", "skill/references/collaboration-policy.md"]) {
+    const text = fs.readFileSync(file, "utf8");
+    expect(text).toContain("unqualified 飄移 / drift always means overall drift");
+    expect(text).toContain("whether governance work has displaced the original deliverables");
+    expect(text).toContain("Latest-patch alignment or green checks alone cannot support an overall no-drift conclusion");
+    expect(text).toContain("overall verdict is UNKNOWN unless already-read evidence establishes material DRIFT_FOUND");
+    expect(text).toContain("never present a scoped PASS as an overall verdict");
+  }
 });
