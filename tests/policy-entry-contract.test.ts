@@ -21,7 +21,7 @@ describe("copied C2C entry contracts (static content, not fresh host behavior)",
     expect(fence(skill, "## Boot prompt")).toBe(boot);
   });
   it.each([ ["Project", project], ["boot", boot] ])("%s alone carries the canonical locator and review/authority contract", (_, copied) => {
-    expect(copied).toContain("format 1.0.1 / package 0.3.2");
+    expect(copied).toContain("format 1.0.1 / package 0.3.3");
     expect(copied).toContain("references/full-format.md");
     expect(copied).toContain("Actually read the bound source");
     for (const axis of axes) expect(copied).toContain(axis);
@@ -31,6 +31,9 @@ describe("copied C2C entry contracts (static content, not fresh host behavior)",
     expect(copied).toContain("mark its durable link UNKNOWN");
     expect(copied).toContain("not a prerequisite");
     expect(copied).not.toContain("otherwise use local full records");
+    expect(copied).toContain("unqualified 飄移 / drift always means overall drift");
+    expect(copied).toContain("whether governance work has displaced the original deliverables");
+    expect(copied).toContain("never present a scoped PASS as an overall verdict");
     expect(copied).toContain("Reuse completed bound clarity/interviews");
     expect(copied).toContain("first meaningful failure invoke Progressive Investigation");
     expect(copied).toContain("new evidence and a changed strategy");

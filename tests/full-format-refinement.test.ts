@@ -57,10 +57,10 @@ it("binds exact canonical bytes and public repository provenance", () => {
   const metadata = JSON.parse(fs.readFileSync("skill/references/approved-source.json", "utf8"));
   const raw = fs.readFileSync(`skill/${metadata.canonical_path}`);
   expect(metadata.format_version).toBe("1.0.1");
-  expect(metadata.package_version).toBe("0.3.2");
+  expect(metadata.package_version).toBe("0.3.3");
   expect(raw.length).toBe(13197);
   expect(createHash("sha256").update(raw).digest("hex"))
-    .toBe("b3c06134818c0e6d5725b207c1c87e05858b661f7ce23973ca30d241dc17b663");
+    .toBe("82b866499d13f27487a46a63b5e38fa3ac5f4b11b855a0b71a8b955eeaed401c");
   expect(metadata.sha256).toBe(createHash("sha256").update(raw).digest("hex"));
   expect(metadata.source.kind).toBe("repository-copy");
   expect(metadata.source.repository).toBe("https://github.com/jack61714z/codex-with-chatgpt");

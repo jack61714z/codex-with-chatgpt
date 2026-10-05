@@ -1,9 +1,9 @@
 {
   "format_version": "1.0.1",
-  "package_version": "0.3.2",
+  "package_version": "0.3.3",
   "canonical_path": "references/full-format.md",
   "path_base": "skill-root",
-  "sha256": "b3c06134818c0e6d5725b207c1c87e05858b661f7ce23973ca30d241dc17b663",
+  "sha256": "82b866499d13f27487a46a63b5e38fa3ac5f4b11b855a0b71a8b955eeaed401c",
   "utf8_bytes": 13197,
   "source": {
     "kind": "repository-copy",
