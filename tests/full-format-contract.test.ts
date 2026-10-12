@@ -76,7 +76,7 @@ it("compact pointer and continuation retain document-only semantics", () => {
   expect(protocol).toContain("ITERATION: <numeric checkpoint iteration, or UNKNOWN>");
   expect(protocol).toContain("REPAIR_LABEL: <separate label or NONE>");
   expect(protocol).toContain("EXECUTOR: <verified actual executor or UNKNOWN>");
-  expect(protocol).toContain("EXECUTED_SENT waits for Chat review and never sends the pointer again");
+  expect(protocol).toContain("EXECUTED_SENT waits for the selected owner's required review or completion decision, carried or relayed through the authorized conversation, and never sends the pointer again");
   expect(protocol).toContain("BLOCKED names the affected action");
   expect(protocol).toContain("NEXT_AUTHORIZED_ACTION: <unchanged request/action required by the selected task contract>");
   expect(protocol).toContain("If the selected contract requires a literal review question, carry it unchanged");

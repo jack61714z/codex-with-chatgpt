@@ -186,7 +186,7 @@ Credentials stay in the OS app state directory, not in the project.
   tools: `workspace_info`, `list_directory`, `read_file`, `search_workspace`,
   `git_status`, `git_diff`, `test_status`, `execution_summary`,
   `execution_output`, `read_image`.
-- **System review**: Chat reads actual committed changes and necessary affected context against original requirements in both directions. Receipts, digests and green tests do not alone prove acceptance. Local commits without a push have no remote audit record.
+- **System review**: When the selected project contract assigns this duty to Chat, including existing projects retaining that obligation, Chat reads actual committed changes and necessary affected context against original requirements in both directions. Receipts, digests and green tests do not alone prove acceptance. Local commits without a push have no remote audit record.
 
 ### Generated media handoff
 
