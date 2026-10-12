@@ -117,7 +117,7 @@ Ready.
   `workspace_info`、`list_directory`、`read_file`、`search_workspace`、
   `git_status`、`git_diff`、`test_status`、`execution_summary`、
   `execution_output`、`read_image`。
-- **独立审查**：Codex 执行完毕后，ChatGPT 以授权仓库的 pushed commit 为主要证据，结合必要上下文与 C2C 元数据亲自检查累积变更
+- **独立审查**：若现行项目操作约定将此责任交给 ChatGPT（包括保留此义务的既有项目），Codex 执行完毕后，ChatGPT 以授权仓库的 pushed commit 为主要证据，结合必要上下文与 C2C 元数据亲自检查累积变更
   和测试记录——绝不因为 Codex 说"测试全过"就直接相信。
 
 ### 生成媒体交接
