@@ -32,7 +32,7 @@ Agent（Codex），然后去倒杯咖啡：
 3. 构建：在该目录里执行 corepack pnpm install 和 corepack pnpm build。
 4. 安装 Skill：先确定 Codex home：如果设置了非空的 CODEX_HOME 就使用它，
    否则使用 ~/.codex（Windows 默认为 %USERPROFILE%\.codex）。把仓库里的
-   从 checkout root 按 references/maintenance.md 运行完整目录 helper：
+   从 checkout root 按 skill/references/maintenance.md 运行完整目录 helper：
    node scripts/install-skill.mjs ./skill <codex-home>/skills/codex-with-chatgpt [saved-previous-source-skill]
    已有安装使用保存的旧 source 作基准，保留现有 launcher 自订内容与回复点；不只复制 SKILL.md。
 5. 首次配置：先读 SKILL.md，再按 references/connection-and-recovery.md 的 first-time setup 流程执行
