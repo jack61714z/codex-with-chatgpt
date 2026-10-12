@@ -20,26 +20,32 @@ describe("copied C2C entry contracts (static content, not fresh host behavior)",
     expect(fence(connection, "### Project instructions (paste")).toBe(project);
     expect(fence(skill, "## Boot prompt")).toBe(boot);
   });
-  it.each([ ["Project", project], ["boot", boot] ])("%s alone carries the canonical locator and review/authority contract", (_, copied) => {
-    expect(copied).toContain("format 1.0.1 / package 0.3.3");
-    expect(copied).toContain("references/full-format.md");
-    expect(copied).toContain("Actually read the bound source");
-    for (const axis of axes) expect(copied).toContain(axis);
-    expect(copied).toContain(question);
-    expect(copied).toContain("only when destination and publication are authorized");
-    expect(copied).toContain("existing authorized conversation");
-    expect(copied).toContain("mark its durable link UNKNOWN");
-    expect(copied).toContain("not a prerequisite");
-    expect(copied).not.toContain("otherwise use local full records");
-    expect(copied).toContain("unqualified 飄移 / drift always means overall drift");
-    expect(copied).toContain("whether governance work has displaced the original deliverables");
-    expect(copied).toContain("never present a scoped PASS as an overall verdict");
-    expect(copied).toContain("Reuse completed bound clarity/interviews");
-    expect(copied).toContain("first meaningful failure invoke Progressive Investigation");
-    expect(copied).toContain("new evidence and a changed strategy");
-    expect(copied).toContain("requested-report exception");
-    expect(copied).toContain("existing applicable final-wave caps");
-    expect(copied).toContain("not universal caps for every first error");
+  it.each([ ["Project", project], ["boot", boot] ])("%s separates transport from the selected project contract", (_, copied) => {
+    expect(copied).toContain("selected project operating instructions");
+    expect(copied).toContain("roles, permissions, review duties, record format and loop limits");
+    expect(copied).toContain("installed codex-with-chatgpt skill's references/legacy-policy-migration.md");
+    expect(copied).toContain("source checkout: skill/references/legacy-policy-migration.md");
+    expect(copied).toContain("mark the affected source/decision UNKNOWN");
+    expect(copied).toContain("need no legacy policy or companion method");
+    expect(copied).toContain("Carry required records, completion requests and next-action text unchanged");
+    expect(copied).toContain("never prefill a review verdict");
+    expect(copied).toContain("Delivery is not acceptance or effect authority");
+    expect(copied).not.toContain("format 1.0.1 / package 0.3.3");
+    expect(copied).not.toContain(question);
+    const full = read("skill/references/full-format.md");
+    for (const axis of axes) expect(full).toContain(`AXIS: ${axis}`);
+    expect(full).toContain(question);
+  });
+  it("preserves legacy policy selection and its complete loop rule without requiring it for new adopters", () => {
+    const migration = read("skill/references/legacy-policy-migration.md");
+    expect(migration).toContain("New adopters with an adequate task contract do not need");
+    expect(migration).toContain("No private account plugin is needed");
+    expect(migration).toContain("before replacing the transport entry");
+    expect(migration).toContain("retain that consumer's previous usable instruction set");
+    expect(migration).toContain("Read `maxIterations` from the workspace's `.c2c.json`");
+    expect(migration).toContain("workflow default of 12 iterations");
+    expect(migration).toContain("return progress, unresolved issues and loop evidence to Chat");
+    expect(migration).toContain("explicit compatibility review");
   });
   it("removes unsupported browser recipes and anchors installed navigation references", () => {
     for (const old of ["setupBrowserRuntime", "agent.browsers", "tabs.new()", "markHandoff", "markDeliverable", "control-in-app-browser", "`docs/protocol.md`"]) expect(connection).not.toContain(old);
@@ -81,10 +87,7 @@ it("documents explicit runtime checkpoint persistence without the removed coding
     expect(text).toContain("Verify the receipt is visible in the bound Chat conversation before persisting EXECUTED_SENT");
     expect(text).toContain("--protocol-state EXECUTED_SENT --waiting-for GPT_REVIEW");
     expect(text).toContain("--state DONE --clear-checkpoint");
-    expect(text).toContain("Read `maxIterations` from the workspace's `.c2c.json`");
-    expect(text).toContain("workflow default of 12 iterations");
     expect(text).toContain("does not enforce the loop limit at runtime");
-    expect(text).toContain("return progress, unresolved issues and loop evidence to Chat");
   }
   expect(read("skill/references/connection-and-recovery.md")).not.toContain("checkpoint flags from the coding workflow");
 });

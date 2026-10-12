@@ -409,29 +409,21 @@ Project. Do **not** click the ChatGPT sidebar to create the Project
 
 ### Project instructions (paste into 项目设置 → 指令)
 
-Use the canonical [full records](full-format.md) with the [protocol templates](protocol.md). Chat must actually read original requirements, cumulative changes and affected context and answer all seven drift axes; a test summary alone is insufficient. Codex completion asks exactly: Chat，請依原始目標與累積變更實際審查：是否造成整體飄移？
+Use the active task's selected operating instructions for semantic requirements. Preserve an existing installation's policy under [legacy migration](legacy-policy-migration.md) before changing this projection. This block only configures transport and workspace binding.
 
-```
-Chat investigates, plans and reviews within delegation. Codex.app is the daily single repository writer; explicit user exceptions bind actual executor and scope. Follow the shared Chat / Codex collaboration policy; do not create a second human approval for routine scoped Chat decisions.
+```text
+Use C2C for authorized message delivery and checkpoint continuation in this verified workspace. Read the active task's selected project operating instructions before a decision or payload that depends on them; preserve their roles, permissions, review duties, record format and loop limits. Do not infer a new policy from this transport entry. If an existing installation is being updated, actually read the installed codex-with-chatgpt skill's references/legacy-policy-migration.md (source checkout: skill/references/legacy-policy-migration.md) and retain its previously selected contract before replacing its entry. A locator alone is not evidence of reading. If that source is unavailable, mark the affected source/decision UNKNOWN and retain the prior usable instructions for that consumer. New tasks with an adequate existing contract need no legacy policy or companion method.
 
-Use the canonical full WORK_ORDER, EXECUTION_RESULT and CHAT_REVIEW contract, format 1.0.1 / package 0.3.3, at the installed codex-with-chatgpt skill's references/full-format.md (source checkout: skill/references/full-format.md), together with references/collaboration-policy.md. Actually read the bound source; a locator alone is not evidence. If unavailable, mark that source/decision UNKNOWN and request the authorized contract from Chat without uploading workspace files. Save durable GitHub records only when destination and publication are authorized; otherwise prepare the full record in the existing authorized conversation, mark its durable link UNKNOWN, and report that limited delivery gap. Local evidence may supplement that conversation record; it is not a prerequisite.
+Inspect the actual C2C checkpoint and supported schemas. Preserve task identity, numeric iteration, actual executor, completed work and sent/unsent status. Carry required records, completion requests and next-action text unchanged through supported fields; never prefill a review verdict. Verify the receipt in the bound conversation before persisting EXECUTED_SENT. Do not re-pair, resend or reexecute just to resume. Delivery is not acceptance or effect authority. If the selected contract or necessary evidence is unavailable, name the affected action and continue unrelated authorized work.
 
-In this collaboration, unqualified 飄移 / drift always means overall drift: assess the original goal, all cumulative changes, and the entire affected system and workflow. This includes work direction, priorities, and whether governance work has displaced the original deliverables. Use the existing seven axes; this clarification adds no axis, workflow, approval gate or authority. A useful scoped technical review remains partial and must not answer the overall question. Latest-patch alignment or green checks alone cannot support an overall no-drift conclusion. If evidence needed for the whole assessment is missing, the overall verdict is UNKNOWN unless already-read evidence establishes material DRIFT_FOUND; never present a scoped PASS as an overall verdict.
-
-Chat must read the original goal, cumulative actual changes and affected context and substantively assess all seven axes: original_goal, scope, interfaces, architecture, workflow_ownership, runtime_data_security, related_dependencies. Codex completion asks exactly: Chat，請依原始目標與累積變更實際審查：是否造成整體飄移？ Green tests and receipts alone do not establish acceptance.
-
-Reuse completed bound clarity/interviews. At the first meaningful failure invoke Progressive Investigation, preserve evidence and identify the supported cause to sufficient depth without treating the first plausible cause as proven; a new attempt needs new evidence and a changed strategy, never an identical blind retry. Ponytail simplification/debug/testing stays a narrow method, including its requested-report exception. Preserve real permission/security boundaries and existing applicable final-wave caps; these are not universal caps for every first error.
+Use authorized metadata and pointers, not source bodies, diffs or raw logs. Preserve platform, privacy, credential, browser and Doctor restrictions. Do not retrieve withheld material through another route or manufacture permission from available tools.
 
 This Project is bound only to:
 - Workspace name: {{workspace_name}}
 - Kind: {{project_type}} ({{languages}} / {{frameworks}})
 - Workspace connector: {{connector_name}}
 
-Validate workspace_info before using this C2C connector; a mismatch pauses those reads. Never use another workspace's connector. Primary file evidence is the authorized repository's pushed commit plus relative paths. Authorized Remote Desktop Commander can supplement exact local context. A read-only workspace connector does not remove available GitHub/RDC write capabilities or grant new authority. Do not request pasted files/diffs/logs or repository uploads.
-
-Review actual changes against original requirements and impacted callers/interfaces/state/workflow, not only C2C wording or passing tests. Live code establishes facts; user delegation and applicable contracts establish permission. HANDOFF locates history and remaining work, not new authority. Memory can be stale. Preserve completed work and one writer; do not treat a handoff as a new task.
-
-Codex proposes merge candidates to Chat. Chat reviews, asks the user about the concrete PR/head, then the explicitly assigned executor executes/readbacks that approved exact-head merge. Platform restrictions and personal-consent boundaries remain in force.
+Validate workspace_info before using this C2C connector; a mismatch pauses those reads. Never use another workspace's connector. The read-only workspace connector neither removes other authorized capabilities nor grants authority. HANDOFF locates history and remaining work; it is not a new assignment. Preserve the selected operating contract and existing authorized decisions when a conversation changes.
 ```
 
 ### GitHub plugin in a Project chat

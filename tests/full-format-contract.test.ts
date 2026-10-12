@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import { describe, it, expect } from "vitest";
 
-describe("static document contract (not host behavior)", () => {
+describe("frozen legacy document contract (not universal transport policy or host behavior)", () => {
   it("ships canonical full records and literal drift question", () => {
     const full = fs.readFileSync("skill/references/full-format.md", "utf8");
     expect(full).toContain("FORMAT_VERSION: 1.0.1");
@@ -78,7 +78,9 @@ it("compact pointer and continuation retain document-only semantics", () => {
   expect(protocol).toContain("EXECUTOR: <verified actual executor or UNKNOWN>");
   expect(protocol).toContain("EXECUTED_SENT waits for Chat review and never sends the pointer again");
   expect(protocol).toContain("BLOCKED names the affected action");
-  expect(protocol).toContain("NEXT_AUTHORIZED_ACTION: Chat，請依原始目標與累積變更實際審查：是否造成整體飄移？");
+  expect(protocol).toContain("NEXT_AUTHORIZED_ACTION: <unchanged request/action required by the selected task contract>");
+  expect(protocol).toContain("If the selected contract requires a literal review question, carry it unchanged");
+  expect(protocol).not.toContain("FORMAT_SOURCE: <0.3.3;");
   const full = fs.readFileSync("skill/references/full-format.md", "utf8");
   expect(full).toContain("original requirement/baseline, actual cumulative changes");
   expect(full).toContain("Forty green tests");
@@ -105,8 +107,8 @@ it("recognizes native and Windows connection-reference paths (portable inputs, n
   expect(isConnectionReference(path.win32.join("references", "protocol.md"))).toBe(false);
 });
 
-it("entry and policy retain the accepted whole-drift definition", () => {
-  for (const file of ["skill/SKILL.md", "skill/references/collaboration-policy.md"]) {
+it("legacy policy retains whole-drift duties while transport delegates their selection", () => {
+  for (const file of ["skill/references/collaboration-policy.md"]) {
     const text = fs.readFileSync(file, "utf8");
     expect(text).toContain("unqualified 飄移 / drift always means overall drift");
     expect(text).toContain("whether governance work has displaced the original deliverables");
@@ -114,4 +116,14 @@ it("entry and policy retain the accepted whole-drift definition", () => {
     expect(text).toContain("overall verdict is UNKNOWN unless already-read evidence establishes material DRIFT_FOUND");
     expect(text).toContain("never present a scoped PASS as an overall verdict");
   }
+});
+
+it("transport entry imports no mandatory semantic method or universal legacy format", () => {
+  const entry = fs.readFileSync("skill/SKILL.md", "utf8");
+  expect(entry).toContain("selected operating instructions");
+  expect(entry).toContain("New adopters need no legacy policy package or companion method");
+  expect(entry).not.toContain("Read [the shared collaboration policy]");
+  expect(entry).not.toContain("Use [the canonical full records]");
+  expect(entry).not.toContain("Progressive Investigation");
+  expect(entry).not.toContain("Ponytail");
 });
