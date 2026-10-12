@@ -1,6 +1,6 @@
 # Troubleshooting
 
-At the first meaningful failure, preserve the symptom, timestamp and current state and use Progressive Investigation under the [shared policy](../skill/references/collaboration-policy.md). Distinguish instruction/catalog/browser failures from local bridge faults before repair. A new attempt needs new evidence and a changed strategy; a retry cap never authorizes an identical blind repeat.
+At the first meaningful failure, preserve the symptom, timestamp and current state. Use the active project's investigation method where applicable; C2C does not select that method. Existing adopters retain their selected investigation duties under [legacy migration](../skill/references/legacy-policy-migration.md). Distinguish instruction/catalog/browser failures from local bridge faults before repair. A new attempt needs new evidence and a changed strategy; a retry cap never authorizes an identical blind repeat.
 
 For a suspected local connection fault, use the following diagnostic only within existing authorization for local state reads and endpoint persistence:
 

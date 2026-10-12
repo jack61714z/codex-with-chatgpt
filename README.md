@@ -1,7 +1,7 @@
 # Codex with ChatGPT
 
-> Chat investigates, plans and reviews; Codex.app is the daily single repository writer.
-> 共同分工以 [collaboration policy](skill/references/collaboration-policy.md) 为准。
+> C2C connects a verified Chat/Codex workspace and carries authorized messages.
+> 分工与审查由现行项目指令决定；既有安装更新时先[保留原操作约定](skill/references/legacy-policy-migration.md)。
 
 > [!IMPORTANT]
 > Diagnose the actual connection/load failure before updating. Preserve local policy customizations and platform safety holds; see [maintenance](skill/references/maintenance.md).
@@ -10,18 +10,18 @@
 
 **中文** — ChatGPT 付费订阅的网页版额度大量闲置，Codex 却在消耗紧张的
 API 额度做规划和 Review。本项目把"思考"交给你已付费的网页版 ChatGPT，
-Codex.app 是日常 repo 唯一 writer；Chat 負責調查、規劃與審查。不用 API Key、不搞逆向代理——官方网页 + 只读 MCP 桥接。
+实际写入者、调查、规划与审查责任由现行项目指令决定。不用 API Key、不搞逆向代理——官方网页 + 只读 MCP 桥接。
 
 **EN** — ChatGPT Plus/Pro web quota sits idle while your coding agent burns
 scarce API/Codex tokens on planning and review. This project moves the
-investigation, planning and review to Chat; Codex.app is the daily single repository writer.
+messages between Chat and Codex; the active project assigns investigation, writing and review responsibilities.
 No API keys, no reverse proxy — official web UI plus a read-only MCP bridge.
 
 ## What it is · 这是什么
 
-**中文** — C2C 提供安全的只读 workspace 连接与小型控制讯息。它不会把 Chat 固定成唯读角色；其他已授权 GitHub/RDC 能力仍按共同政策使用。
+**中文** — C2C 提供安全的只读 workspace 连接与小型控制讯息。它不会把 Chat 固定成唯读角色；其他已授权能力仍按现行项目权限使用。
 
-**EN** — C2C supplies a secure read-only workspace connection and small control messages. This bridge limitation does not define Chat's other authorized capabilities. File evidence is commit-first; bounded authorized RDC reads supplement local context.
+**EN** — C2C supplies a secure read-only workspace connection and small control messages. This bridge limitation does not define Chat's other authorized capabilities. The selected project instructions govern evidence, review and effect authority.
 
 Detailed docs below are in English · 详细中文文档见 **[README.zh-CN.md](README.zh-CN.md)**
 
@@ -278,4 +278,4 @@ connector setup, zero-touch first-run experience.
  </picture>
 </a>
 
-For complete local text installation/update with customization preservation, use `node scripts/install-skill.mjs ./skill <destination> [saved-previous-source-skill]` after saving a recovery copy; see [maintenance](skill/references/maintenance.md). Full records use [canonical format 1.0.1 / package 0.3.3](skill/references/full-format.md). This is the contract version, not a C2C runtime package version bump.
+For complete local text installation/update with customization preservation, use `node scripts/install-skill.mjs ./skill <destination> [saved-previous-source-skill]` after saving a recovery copy; see [maintenance](skill/references/maintenance.md). Existing adopters preserve their selected operating contract through [legacy migration](skill/references/legacy-policy-migration.md). The bundled 0.3.3 policy, 1.0.1 full-format and matching provenance are frozen compatibility sources, not mandatory policy for new C2C users. No companion method or private plugin is required.

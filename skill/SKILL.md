@@ -1,23 +1,17 @@
 ---
 name: codex-with-chatgpt
-description: Connect or recover a bound Chat/Codex workspace and coordinate a scoped task through C2C.
+description: Connect or recover a bound Chat/Codex workspace and exchange authorized messages through C2C.
 ---
 
 # Codex with ChatGPT
 
-Read [the shared collaboration policy](references/collaboration-policy.md) when using this skill. Chat investigates, plans and reviews; Codex.app is the daily single repository writer. A user may explicitly name another executor for a bounded exception; record the actual executor and authority without changing the future default. C2C communicates decisions and metadata; it does not grant permission.
+Use C2C to connect the verified Chat/Codex workspace, exchange authorized messages and record pointers, and resume the installed transport's actual checkpoint state. Read the active task's selected operating instructions where a decision or payload depends on them. C2C does not define investigation, acceptance, drift review, improvement, task tracking, repository ownership, merge approval or substantive record formats. Capability and delivery receipts grant no authority.
 
-In this collaboration, unqualified 飄移 / drift always means overall drift: assess the original goal, all cumulative changes, and the entire affected system and workflow. This includes work direction, priorities, and whether governance work has displaced the original deliverables. Use the existing seven axes; this clarification adds no axis, workflow, approval gate or authority. A useful scoped technical review remains partial and must not answer the overall question. Latest-patch alignment or green checks alone cannot support an overall no-drift conclusion. If evidence needed for the whole assessment is missing, the overall verdict is UNKNOWN unless already-read evidence establishes material DRIFT_FOUND; never present a scoped PASS as an overall verdict.
-
-- Follow the approved task pipeline in the shared policy: reuse completed clarity, preserve first-failure evidence through Progressive Investigation, and use Ponytail only as a narrow method. A new attempt needs new evidence and a changed strategy; no blind second wave; honor only existing applicable final-wave caps, not a universal cap for every first error.
+Preserve task/workspace identity, numeric iteration, verified executor, completed work and sent/unsent state. Carry the active task's required payload and next-action text unchanged through supported fields. Do not invent protocol fields or states, re-pair to resume, reexecute completed work or resend an already-delivered result. Missing policy evidence or capability limits only the affected action; continue unrelated authorized work. Existing platform, privacy and security restrictions remain effective.
 
 - Use [connection and recovery](references/connection-and-recovery.md) only for setup, pairing, browser operation, workspace binding or failures. Preserve its credential and Doctor gates.
-- Use [the canonical full records](references/full-format.md) for WORK_ORDER, EXECUTION_RESULT and CHAT_REVIEW; compact C2C messages carry pointers and the literal overall drift review request.
-- Use [protocol and templates](references/protocol.md) for an existing scoped task; resume checkpoints instead of repeating completed actions.
+- Use [protocol and transport projections](references/protocol.md) for an existing task; resume checkpoints instead of repeating completed actions. Records and required completion questions come from the selected task contract, not a universal C2C format.
 - Use [maintenance](references/maintenance.md) only for requested installation/update work. A discovered update is not permission to overwrite customizations or change security settings.
+- Before updating an existing instruction installation, follow [legacy policy preservation](references/legacy-policy-migration.md). Existing project duties are not removed by this transport separation. New adopters need no legacy policy package or companion method.
 
-Primary file evidence is an authorized repository's pushed commit plus paths. Local-only commits are not remote records; authorized RDC reads supplement local context. No workspace attachments, pasted source/raw logs or external sharing links.
-
-Continue a scoped Chat-authorized cycle without per-file/test approval. Return conflicts to Chat with their concrete sources. Chat reviews original requirements and actual affected system; it owns user escalation and exact-head merge review/approval; merge execution requires an explicitly assigned executor. Platform restrictions remain binding.
-
-Completion: scoped behavior verified, necessary evidence available, no unauthorized scope/effect, and activation/testing limitations disclosed. Local policy installation does not publish the cloud plugin.
+Keep control messages and receipts to authorized metadata and pointers; do not paste source bodies, diffs or raw logs into them or retrieve a withheld body through another route. Transport completion means the actual delivery/checkpoint result supported by evidence, not acceptance, merge, installation in another host or completion of the parent task.

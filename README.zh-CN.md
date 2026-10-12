@@ -2,17 +2,17 @@
 
 [English](README.md) | **简体中文**
 
-> ChatGPT 负责思考，Codex 负责干活。
+> C2C 负责连接与传递；实际分工由现行项目指令决定。
 
 ## 解决什么问题
 
 ChatGPT 付费订阅的网页版额度大量闲置，Codex 却在消耗紧张的 API 额度做
-规划和 Review。本项目把"思考"交给你已付费的网页版 ChatGPT，Codex 只负责
-执行。不用 API Key、不搞逆向代理——官方网页 + 只读 MCP 桥接。
+规划和 Review。本项目连接网页版 ChatGPT 与 Codex，按照现行项目指令
+传递获准的任务与结果。不用 API Key、不搞逆向代理——官方网页 + 只读 MCP 桥接。
 
 ## 这是什么
 
-把 ChatGPT 网页版变成 Codex 编码会话的"规划与审查大脑"，由 Codex.app 作为日常唯一仓库写入者；用户可明确指定有边界的执行例外。
+连接 ChatGPT 网页版与 Codex 编码会话；写入、审查与批准责任仍由现行项目指令决定。既有安装更新前先按[迁移说明](skill/references/legacy-policy-migration.md)保留原操作约定。
 你的仓库永远不会被上传——ChatGPT 通过一条安全的、OAuth 保护的
 **只读** MCP 连接，按需读取当前工作区里它真正需要的那几行代码。
 
@@ -193,4 +193,4 @@ V1。已端到端验证：Bridge、OAuth + 配对、公网隧道、ChatGPT 连�
 
 [MIT](LICENSE)
 
-For complete local text installation/update with customization preservation, use `node scripts/install-skill.mjs ./skill <destination> [saved-previous-source-skill]` after saving a recovery copy; see [maintenance](skill/references/maintenance.md). Full records use [canonical format 1.0.1 / package 0.3.3](skill/references/full-format.md). This is the contract version, not a C2C runtime package version bump.
+For complete local text installation/update with customization preservation, use `node scripts/install-skill.mjs ./skill <destination> [saved-previous-source-skill]` after saving a recovery copy; see [maintenance](skill/references/maintenance.md). Existing adopters preserve their selected operating contract through [legacy migration](skill/references/legacy-policy-migration.md). The bundled 0.3.3 policy, 1.0.1 full-format and matching provenance are frozen compatibility sources, not mandatory policy for new C2C users. No companion method or private plugin is required.
