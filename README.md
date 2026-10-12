@@ -41,7 +41,7 @@ Detailed docs below are in English · 详细中文文档见 **[README.zh-CN.md](
 3. 构建：在该目录里执行 corepack pnpm install 和 corepack pnpm build。
 4. 安装 Skill：先确定 Codex home：如果设置了非空的 CODEX_HOME 就使用它，
    否则使用 ~/.codex（Windows 默认为 %USERPROFILE%\.codex）。把仓库里的
-   从 checkout root 按 references/maintenance.md 运行完整目录 helper：
+   从 checkout root 按 skill/references/maintenance.md 运行完整目录 helper：
    node scripts/install-skill.mjs ./skill <codex-home>/skills/codex-with-chatgpt [saved-previous-source-skill]
    已有安装使用保存的旧 source 作基准，保留现有机器专用 launcher 规则与回复点。
    若此安装曾遭平台安全拒绝，先走正式 clearance，不重放写入。
@@ -71,7 +71,7 @@ I am a non-technical user — do everything yourself:
 3. Build: inside that folder run `corepack pnpm install` then `corepack pnpm build`.
 4. Install the Skill: determine the Codex home first: use a non-empty CODEX_HOME
    when set, otherwise use ~/.codex (%USERPROFILE%\.codex on Windows). From
-   the checkout root, follow references/maintenance.md and run
+   the checkout root, follow skill/references/maintenance.md and run
    node scripts/install-skill.mjs ./skill <codex-home>/skills/codex-with-chatgpt [saved-previous-source-skill]
    Existing installs use the saved previous source baseline; preserve backups
    and machine-specific launcher rules. If this installation was
